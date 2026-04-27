@@ -9,11 +9,15 @@ import { dailyReportSummaryJob, cleanupOldReportsJob } from './jobs/report.job.j
 import { highRiskAlertJob, pendingReportReminderJob } from './jobs/alert.job.js';
 
 const server = http.createServer(app);
+const allowedOrigins = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Setup Socket.io
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
     methods: ['GET', 'POST'],
   },
 });

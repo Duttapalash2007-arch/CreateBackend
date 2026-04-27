@@ -20,6 +20,10 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsDir = process.env.VERCEL ? path.join(os.tmpdir(), 'uploads') : path.join(__dirname, '../uploads');
+const allowedOrigins = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // ============= MIDDLEWARE =============
 
@@ -29,7 +33,13 @@ app.use(helmet());
 // CORS middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
   })
 );
@@ -55,6 +65,15 @@ app.use((req, res, next) => {
 });
 
 // ============= ROUTES =============
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Healthcare Assistant API is running',
+    docs: '/api',
+    health: '/health',
+  });
+});
 
 // Health check
 app.get('/health', (req, res) => {
