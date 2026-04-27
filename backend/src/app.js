@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { envConfig } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { errorMiddleware, notFoundMiddleware } from './middlewares/error.middleware.js';
 
@@ -20,10 +21,7 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsDir = process.env.VERCEL ? path.join(os.tmpdir(), 'uploads') : path.join(__dirname, '../uploads');
-const allowedOrigins = (process.env.CORS_ORIGIN || '*')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = envConfig.corsOrigins;
 
 // ============= MIDDLEWARE =============
 
